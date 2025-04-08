@@ -7,7 +7,7 @@ from ultralytics import YOLO
 from utils import draw_bboxes  # Optional: if you want to use your custom bbox drawer
 
 # Load YOLOv8m model
-model = YOLO("PLcounter_best.pt")
+model = YOLO("best.pt")
 
 # Streamlit page configuration
 st.set_page_config(page_title="PL Counter Model", layout="wide")
