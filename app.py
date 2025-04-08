@@ -1,6 +1,7 @@
 import streamlit as st
 import torch
 import cv2
+print("Using OpenCV from:", cv2.__file__)
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
