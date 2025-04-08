@@ -5,7 +5,7 @@ print("Using OpenCV from:", cv2.__file__)
 import numpy as np
 from PIL import Image
 from ultralytics import YOLO
-from utils import draw_bboxes  # Optional: if you want to use your custom bbox drawer
+from custom_utils import draw_bboxes  # Optional: if you want to use your custom bbox drawer
 
 # Load YOLOv8m model
 model = YOLO("best.pt")
