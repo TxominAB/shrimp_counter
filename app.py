@@ -7,7 +7,11 @@ import tempfile
 import os
 
 # Load the YOLOv8 model
-model = YOLO("best.pt")  # Make sure this model is in the same directory
+@st.cache_resource
+def load_model():
+    return YOLO("best.pt")  # loads from Ultralytics online if not cached
+
+model = load_model()
 
 # Page setup
 st.set_page_config(page_title="GROBEST Shrimp Counter", layout="wide")
