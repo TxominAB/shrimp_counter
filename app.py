@@ -29,8 +29,11 @@ if uploaded_file is not None:
     # Perform inference
     results = perform_inference(image_cv)
     
+    # Extract bounding boxes from the results object
+    boxes = results[0].boxes.xyxy  # Get bounding box coordinates (x1, y1, x2, y2)
+    
     # Draw bounding boxes
-    for box in results['boxes']:
+    for box in boxes:
         x1, y1, x2, y2 = map(int, box[:4])
         cv2.rectangle(image_cv, (x1, y1), (x2, y2), (0, 255, 0), 2)
     
@@ -39,4 +42,4 @@ if uploaded_file is not None:
     
     # Display results
     st.image(image_cv, caption="Detected Objects", use_container_width=True)
-    st.write(f"Total shrimps detected: {len(results['boxes'])}")
+    st.write(f"Total shrimps detected: {len(boxes)}")
