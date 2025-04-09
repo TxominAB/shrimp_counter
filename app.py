@@ -1,24 +1,21 @@
 import streamlit as st
 import cv2
-import torch
 import numpy as np
 from PIL import Image
-import os
-print(os.getcwd())
-
+from yolov8 import YOLOv8
 
 # Load the pretrained YOLOv8 model from the local directory
-model = torch.hub.load('.', 'custom', path='./best.pt', source='local')
+model = YOLOv8('yolov8m.pt')
 
 # Function to perform inference
 def perform_inference(image):
-    results = model(image)
+    results = model.predict(image)
     return results
 
 # Streamlit app
 st.title("Object Detection with YOLOv8")
-st.image("images/company_logo.jpg", use_column_width=True)
-st.image("images/header_image.jpg", use_column_width=True)
+st.image("company_logo.jpg", use_column_width=True)
+st.image("header_image.jpg", use_column_width=True)
 
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
@@ -34,10 +31,10 @@ if uploaded_file is not None:
     results = perform_inference(image_cv)
     
     # Draw bounding boxes
-    for box in results.xyxy[0]:
+    for box in results['boxes']:
         x1, y1, x2, y2 = map(int, box[:4])
         cv2.rectangle(image_cv, (x1, y1), (x2, y2), (0, 255, 0), 2)
     
     # Display results
     st.image(image_cv, caption="Detected Objects", use_column_width=True)
-    st.write(f"Total objects detected: {len(results.xyxy[0])}")
+    st.write(f"Total objects detected: {len(results['boxes'])}")
