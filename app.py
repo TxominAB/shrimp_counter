@@ -14,7 +14,7 @@ def perform_inference(image):
 
 # Streamlit app
 st.title("GROBEST Shrimp Counter tool")
-st.image("main_image.jpg", use_container_width=True)
+st.image("header_image.jpg", use_container_width=True)
 
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
