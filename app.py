@@ -1,52 +1,40 @@
-import os
-os.environ["ULTRALYTICS_HUB"] = "False"
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-
 import streamlit as st
 import cv2
+import torch
 import numpy as np
-from ultralytics import YOLO
+from PIL import Image
 
-# Disable Ultralytics Hub features to prevent threading issues
-os.environ["ULTRALYTICS_HUB"] = "False"
+# Load the pretrained YOLOv8 model from the local directory
+model = torch.hub.load('.', 'custom', path='best.pt', source='local')
 
-# App Configuration
-st.set_page_config(page_title="Object Detector", layout="wide")
+# Function to perform inference
+def perform_inference(image):
+    results = model(image)
+    return results
 
-# Load pretrained YOLOv8m model
-model = YOLO('best.pt')
+# Streamlit app
+st.title("Object Detection with YOLOv8")
+st.image("images/company_logo.png", use_column_width=True)
+st.image("images/header_image.jpg", use_column_width=True)
 
-# Header Section
-col1, col2 = st.columns([1, 4])
-with col1:
-    st.image("images/company_logo.png", width=150)
-with col2:
-    st.image("images/header_image.jpg", use_column_width=True)
-
-# Main Application
-st.title("YOLOv8 Object Detection")
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    # Read and convert image
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-
-    # Perform detection
-    results = model(image)
-
-    # Process results
-    output_image = image.copy()
-    count = 0
-
-    for result in results:
-        boxes = result.boxes.xyxy.cpu().numpy()
-        for box in boxes:
-            # Draw bounding boxes without labels
-            x1, y1, x2, y2 = map(int, box)
-            cv2.rectangle(output_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-            count += 1
-
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
+    
+    # Convert image to OpenCV format
+    image_cv = np.array(image)
+    image_cv = cv2.cvtColor(image_cv, cv2.COLOR_RGB2BGR)
+    
+    # Perform inference
+    results = perform_inference(image_cv)
+    
+    # Draw bounding boxes
+    for box in results.xyxy[0]:
+        x1, y1, x2, y2 = map(int, box[:4])
+        cv2.rectangle(image_cv, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    
     # Display results
-    st.image(output_image, channels="BGR", use_column_width=True)
-    st.success(f"Total Objects Detected: {count}")
+    st.image(image_cv, caption="Detected Objects", use_column_width=True)
+    st.write(f"Total objects detected: {len(results.xyxy[0])}")
