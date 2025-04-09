@@ -3,9 +3,12 @@ import cv2
 import torch
 import numpy as np
 from PIL import Image
+import os
+print(os.getcwd())
+
 
 # Load the pretrained YOLOv8 model from the local directory
-model = torch.hub.load('.', 'custom', path='best.pt', source='local')
+model = torch.hub.load('.', 'custom', path='./best.pt', source='local')
 
 # Function to perform inference
 def perform_inference(image):
@@ -14,7 +17,7 @@ def perform_inference(image):
 
 # Streamlit app
 st.title("Object Detection with YOLOv8")
-st.image("images/company_logo.png", use_column_width=True)
+st.image("images/company_logo.jpg", use_column_width=True)
 st.image("images/header_image.jpg", use_column_width=True)
 
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
