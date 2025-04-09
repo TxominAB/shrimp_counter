@@ -1,56 +1,68 @@
 import streamlit as st
-import cv2
 import numpy as np
-from ultralytics import YOLO
+import cv2
 from PIL import Image
-import tempfile
-import os
+from ultralytics import YOLO
 
-# Load the YOLOv8 model
-@st.cache_resource
-def load_model():
-    return YOLO("best.pt")  # loads from Ultralytics online if not cached
+# Streamlit Page Configuration
+st.set_page_config(
+    page_title="GROBEST Shrimp Tools",
+    layout="wide",
+    page_icon="🦐"
+)
 
-model = load_model()
+# Sidebar Header
+st.sidebar.title("🛠️ GROBEST Shrimp Tools")
+selected_tool = st.sidebar.selectbox(
+    "Select a Tool",
+    ["PL counter"]
+)
 
-# Page setup
-st.set_page_config(page_title="GROBEST Shrimp Counter", layout="wide")
+# Main App Header
+st.title("🦐 GROBEST Shrimp Tools Dashboard")
 
-# Display logo and title
-col1, col2 = st.columns([1, 8])
-with col1:
-    st.image("logo.jpg", width=100)
-with col2:
-    st.markdown("<h1 style='font-size: 32px; margin-top: 20px;'>YOLOv8 Object Detection App</h1>", unsafe_allow_html=True)
+# PL Counter Tool
+if selected_tool == "PL counter":
+    st.markdown("### 📸 Upload an Image for Postlarvae (PL) Counting")
 
-st.markdown("---")
-st.markdown("### Upload an image to detect objects")
+    # Load the YOLOv8 model
+    model_path = "best.pt"  # Replace with your actual path to trained YOLO model
+    try:
+        model = YOLO(model_path)
+    except Exception as e:
+        st.error(f"❌ Error loading YOLO model: {e}")
+        st.stop()
 
-# Upload image
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    # Upload an image
+    uploaded_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
 
-if uploaded_file is not None:
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    image = cv2.imdecode(file_bytes, 1)
-    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    if uploaded_file is not None:
+        # Convert uploaded image to OpenCV format
+        file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+        opencv_image = cv2.imdecode(file_bytes, 1)
 
-    # Run inference
-    results = model(image_rgb)[0]
+        # Run inference
+        with st.spinner("🔍 Counting Postlarvae..."):
+            results = model(opencv_image)
+            num_objects = len(results[0].boxes)
 
-    # Draw bounding boxes (without labels)
-    for box in results.boxes.xyxy.cpu().numpy():
-        x1, y1, x2, y2 = map(int, box)
-        cv2.rectangle(image_rgb, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            # Draw bounding boxes
+            for box in results[0].boxes:
+                x1, y1, x2, y2 = box.xyxy[0]
+                cv2.rectangle(
+                    opencv_image,
+                    (int(x1), int(y1)),
+                    (int(x2), int(y2)),
+                    (0, 255, 0),
+                    2
+                )
 
-    total_objects = len(results.boxes)
+            # Convert image from BGR to RGB for display
+            result_image = Image.fromarray(cv2.cvtColor(opencv_image, cv2.COLOR_BGR2RGB))
 
-    # Show results
-    col_img1, col_img2 = st.columns(2)
-    with col_img1:
-        st.markdown("#### Original Image")
-        st.image(image_rgb, channels="RGB", use_column_width=True)
-
-    with col_img2:
-        st.markdown("#### Inference Output")
-        st.image(image_rgb, channels="RGB", use_column_width=True)
-        st.success(f"✅ Total Objects Detected: {total_objects}")
+        # Display results
+        col1, col2 = st.columns(2)
+        with col1:
+            st.image(result_image, caption="Detected PL", use_column_width=True)
+        with col2:
+            st.metric(label="🔢 Total PL Count", value=num_objects)
