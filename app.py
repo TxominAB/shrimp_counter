@@ -13,15 +13,14 @@ def perform_inference(image):
     return results
 
 # Streamlit app
-st.title("Object Detection with YOLOv8")
-st.image("company_logo.jpg", use_column_width=True)
-st.image("header_image.jpg", use_column_width=True)
+st.title("GROBEST Shrimp Counter tool")
+st.image("main_image.jpg", use_container_width=True)
 
 uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
     
     # Convert image to OpenCV format
     image_cv = np.array(image)
@@ -35,6 +34,9 @@ if uploaded_file is not None:
         x1, y1, x2, y2 = map(int, box[:4])
         cv2.rectangle(image_cv, (x1, y1), (x2, y2), (0, 255, 0), 2)
     
+    # Convert image back to RGB format for displaying in Streamlit
+    image_cv = cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
+    
     # Display results
-    st.image(image_cv, caption="Detected Objects", use_column_width=True)
-    st.write(f"Total objects detected: {len(results['boxes'])}")
+    st.image(image_cv, caption="Detected Objects", use_container_width=True)
+    st.write(f"Total shrimps detected: {len(results['boxes'])}")
