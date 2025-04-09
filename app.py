@@ -2,10 +2,10 @@ import streamlit as st
 import cv2
 import numpy as np
 from PIL import Image
-from yolov8 import YOLOv8
+from ultralytics import YOLO
 
 # Load the pretrained YOLOv8 model from the local directory
-model = YOLOv8('best.pt')
+model = YOLO('best.pt')
 
 # Function to perform inference
 def perform_inference(image):
