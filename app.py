@@ -5,7 +5,7 @@ from PIL import Image
 from yolov8 import YOLOv8
 
 # Load the pretrained YOLOv8 model from the local directory
-model = YOLOv8('yolov8m.pt')
+model = YOLOv8('best.pt')
 
 # Function to perform inference
 def perform_inference(image):
